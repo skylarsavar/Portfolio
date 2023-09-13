@@ -208,5 +208,15 @@ ggplot(all_trips_v01, aes(x=member_casual, fill=member_casual))+
   geom_bar()+
   labs(x="Casuals vs Members", y="Number of Rides", title="Casuals vs Members Distribution")
 
-#Finally I have used the counts function along with the write.CSV function to compile my work to use in another program to visualize and share my findings.
 
+###Analysis and visualization on cylclistics bike demand by hour in a day
+all_trips_v2 %>% 
+  ggplot(aes(started_at, fill = member_casual))+
+  labs(x = "Hour of the Day", title = "Cyclistic's Bike Demand by Hour in a Day")+
+  geom_bar()
+
+
+## Findings 
+Casual rides are more popular on the weekends and for longer periods of time whereas Member rides occur more freqeuently during the week but for much shorter periods of time.
+This could indicate that Members use the bikes more for commuting and Casual riders use them for leisurely activities, as we can see an increase in bike rides starting on Friday
+and lasting through the weekend. 
