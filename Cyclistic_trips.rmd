@@ -273,9 +273,52 @@ rides_by_day <- all_trips_v2 %>%
   arrange(member_casual, weekday)
 ```
 
-
 ```{r}
 save(rides_by_day, file = "rides_by_day.RData")
 ```
- 
+###Visualization bike usage per season 
+```{r}
+all_trips_v2 %>% 
+  mutate(season = case_when(month == '12' | month == '01' | month == '02' ~ 'Winter',
+                            month == '03' | month == '04' | month == '05' ~ 'Spring',
+                            month == '06' | month == '07' | month == '08' ~ 'Summer',
+                            month == '09' | month == '10' | month == '11' ~ 'Autumn')) %>% 
+  group_by(member_casual, season) %>% 
+  summarise(number_of_rides = n(), average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, season) %>% 
+  ggplot(aes(x=season, y=number_of_rides, fill=member_casual))+
+  geom_col(position = "dodge")
+```
+###Analyze average ride duration by season
+```{r}
+all_trips_v2 %>% 
+  mutate(season = case_when(month == '12' | month == '01' | month == '02' ~ 'Winter',
+                            month == '03' | month == '04' | month == '05' ~ 'Spring',
+                            month == '06' | month == '07' | month == '08' ~ 'Summer',
+                            month == '09' | month == '10' | month == '11' ~ 'Autumn')) %>% 
+  group_by(member_casual, season) %>% 
+  summarise(average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, season)
+```{r}
+average_duration_by_season <- all_trips_v2 %>% 
+  mutate(season = case_when(month == '12' | month == '01' | month == '02' ~ 'Winter',
+                            month == '03' | month == '04' | month == '05' ~ 'Spring',
+                            month == '06' | month == '07' | month == '08' ~ 'Summer',
+                            month == '09' | month == '10' | month == '11' ~ 'Autumn')) %>% 
+  group_by(member_casual, season) %>% 
+  summarise(average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, season)
+```
+###Visualize average ride duration by season 
+```{r}
+average_duration_by_season %>% 
+  group_by(member_casual, average_duration) %>% 
+  arrange(member_casual, season) %>% 
+  ggplot(aes(x=season, y=average_duration, fill=member_casual))+
+  geom_col(position = "dodge")
+```
+```{r}
+save(average_duration_by_season, file = "average_duration_season.RData")
+```
+###Export all summary files to Tableau for further analysis and visualization
  
