@@ -1,0 +1,147 @@
+---
+title: "California Housing Market"
+author: "Skylar Savar"
+date: "2023-09-28"
+output:
+  html_document: default
+---
+
+#Install required packages
+```{r}
+install.packages("tidyverse")
+install.packages("skimr")
+install.packages("dplyr")
+install.packages("plyr")
+install.packages("janitor")
+install.packages("ggplot2")
+install.packages("lubridate")
+install.packages("maps")
+install.packages("ggmap")
+install.packages("mapdata")
+install.packages("sf")
+```
+#Load Libraries
+```{r}
+library(tidyverse)
+library(skimr)
+library(dplyr)
+library(plyr)
+library(janitor)
+library(ggplot2)
+library(raster)
+library(lubridate)
+library(maps)
+library(ggmap)
+library(mapdata)
+library(sf)
+```
+#Import dataset
+```{r}
+housing_data<- read_csv("housing.csv")
+```
+#Inspecting the dataset
+```{r}
+head(housing_data)
+```
+```{r}
+str(housing_data)
+```
+#Removed any null values
+```{r}
+drop_na(housing_data)
+```
+#Make sure nulls are removed
+```{r}
+is.na(housing_data)
+```
+#Summary of the data after cleaning
+```{r}
+glimpse(housing_data)
+```
+# Change the ocean_proximity from string type
+```{r}
+housing_data$ocean_proximity = housing_data$ocean_proximity %>% 
+  str_replace_all(c("<1H OCEAN"="<1H Ocean",
+                    "INLAND" = "Inland",
+                    "ISLAND"= "Island",
+                    "NEAR BAY" = "Near Bay",
+                    "NEAR OCEAN" = "Near Ocean"))
+```
+
+
+#Analysis
+
+#Basic summary of metrics: total houses 
+```{r}
+sum(housing_data$households)
+```
+
+#Get an overall summary of the data
+```{r}
+summary(housing_data)
+```
+#Analyze the number of houses and proximity to the ocean.
+```{r}
+household_ocean <- data.frame(matrix(nrow = 5, ncol = 2))
+colnames(household_ocean) <- c("ocean_proximity","household_count")
+household_ocean[,1]<-c("<1H OCEAN","INLAND","ISLAND","NEAR BAY","NEAR OCEAN")
+household_ocean[,2]<-c(sum(housing_data$households[housing_data$ocean_proximity=="<1H OCEAN"])
+                       ,sum(housing_data$households[housing_data$ocean_proximity=="INLAND"])
+                       ,sum(housing_data$households[housing_data$ocean_proximity=="ISLAND"])
+                       ,sum(housing_data$households[housing_data$ocean_proximity=="NEAR BAY"])
+                       ,sum(housing_data$households[housing_data$ocean_proximity=="NEAR OCEAN"])
+                       )
+```
+
+#Visualize the relationship between number of houses and proximity to ocean
+```{r}
+household_ocean %>% 
+  ggplot(aes(x=ocean_proximity,y=household_count))+
+  geom_col(position="dodge")+
+  labs(title="Households vs Proximity to Ocean", x="Proximity to Ocean", y="Number of Households")
+  save(household_ocean, file="household_ocean.csv")
+```
+
+#Mapping the distribution of houses across California
+```{r}
+ca_df <- subset(map_data("state"),region=="california")
+ca_base <- ggplot(data = ca_df, mapping = aes(x = long, y = lat))+
+coord_fixed(1.3)+
+  geom_polygon(color = "black", fill = "white")
+ca_base + theme_nothing()
+```
+
+#Plotting Number of Houses by Location
+```{r}
+ca_base %>% ggplot(data = ca_df, mapping = aes(x = longitude, y = latitude)) +
+  coord_fixed(1.3) +
+  geom_point(data = housing_data, aes(color = households, size = population)) +
+  labs(title = "House Count by Location") +
+  theme_void()+
+  scale_color_distiller(palette = "Paired")
+```
+
+# House value by location 
+```{r}
+ca_base %>% ggplot(data = ca_df, mapping = aes(x = longitude, y = latitude)) +
+  geom_point(data = housing_data, aes(color = median_house_value)) +
+  labs(title = "House Value by Location") +
+  theme_void() +
+  scale_color_distiller(palette = "Paired")
+```
+#Average Income vs Average House Price
+```{r}
+housing_data %>% 
+  ggplot(data=housing_data, mapping=aes(x=median_income, y=median_house_value))+
+  geom_point(aes(col=ocean_proximity))+
+  labs(title="Income vs House Value", x="Average Income", y="Avergae House Value")
+  
+```
+# Analyze income by ocean proximity
+```{r}
+ca_base %>% ggplot(data = ca_df, mapping = aes(x = longitude, y = latitude)) +
+  geom_point(data = housing_data, aes(color = median_income, size = population)) +
+  labs(title = "Average Income by Location") +
+  theme_void()+
+  scale_color_distiller(palette="Paired")
+```
