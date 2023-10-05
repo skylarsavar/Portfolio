@@ -1,0 +1,123 @@
+# Remove unnecessary columns 
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+pod_variety_satisfaction;
+
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+pod_host_preference;
+
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+preferred_pod_format;
+
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+music_expl_method;
+
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+music_Influencial_mood;
+
+ALTER TABLE zeta-time-396120.Spotify.user_data 
+DROP COLUMN 
+music_recc_rating;
+
+# Check for null values 
+SELECT  *
+FROM `zeta-time-396120.Spotify.user_data` 
+WHERE age IS NULL 
+AND Gender IS NULL 
+AND spotify_usage_period IS NULL 
+AND spotify_listening_device IS NULL
+AND spotify_subscription_plan IS NULL
+AND premium_sub_willingness IS NULL
+AND preffered_premium_plan IS NULL
+AND preferred_listening_content IS NULL
+AND fav_music_genre IS NULL
+AND music_time_slot IS NULL
+AND music_lis_frequency IS NULL
+AND pod_lis_frequency IS NULL
+AND fav_pod_genre IS NULL
+AND preffered_pod_format IS NULL
+AND preffered_pod_duration IS NULL
+
+# Fix naming errors in columns 
+ALTER TABLE zeta-time-396120.Spotify.user_data
+RENAME COLUMN preffered_premium_plan TO preferred_premium_plan
+
+ALTER TABLE zeta-time-396120.Spotify.user_data
+RENAME COLUMN preffered_pod_format TO preferred_pod_format
+
+ALTER TABLE zeta-time-396120.Spotify.user_data
+RENAME COLUMN preffered_pod_duration TO preferred_pod_duration
+
+# Review all of the age groups 
+SELECT distinct Age
+FROM zeta-time-396120.Spotify.user_data
+
+#How many users are there within each age group 
+SELECT count(Age) AS user_count_age, Age
+from zeta-time-396120.Spotify.user_data
+GROUP BY Age
+
+#Analyze gender by user count
+SELECT count(Gender) as Gender_Count, Gender
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY Gender
+
+#How many users are there per subscription type 
+SELECT count( spotify_subscription_plan),  spotify_subscription_plan
+from zeta-time-396120.Spotify.user_data
+GROUP BY spotify_subscription_plan
+
+#Number of users by Subscription plan and Age
+SELECT spotify_subscription_plan, COUNT(Age) as user_count, Age
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY spotify_subscription_plan, Age
+
+# Analyze subscription plan by users
+SELECT count( spotify_subscription_plan) as subscription_count,  spotify_subscription_plan
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY spotify_subscription_plan;
+
+# Willingness to upgrade plan
+SELECT count(premium_sub_willingness) as subscription_upgrade_count,  premium_sub_willingness
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY premium_sub_willingness;
+
+# Analyze users by Gender
+SELECT count(Gender) as Gender_Count, Gender
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY Gender;
+
+# What age group uses Spotify the mose
+SELECT spotify_subscription_plan, COUNT(Age) as user_count, Age
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY spotify_subscription_plan, Age;
+
+# Do users prefer using Spotify for Music or Podcasts
+SELECT count(preferred_listening_content) as user_count, preferred_listening_content
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY preferred_listening_content;
+
+# Content type by age group
+SELECT distinct preferred_listening_content, count(Age) as user_count, Age
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY preferred_listening_content, Age;
+
+# What is the main demographic
+select count(Age) as age_count, Gender
+from zeta-time-396120.Spotify.user_data
+where Age = '20-35' AND Gender = 'Female'
+group by Gender;
+
+# Preferred music genres
+SELECT count(fav_music_genre) as user_count, fav_music_genre
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY fav_music_genre;
+
+# Time of day relationship 
+SELECT music_time_slot, count(music_time_slot) as preferred_time, Age
+FROM zeta-time-396120.Spotify.user_data
+GROUP BY music_time_slot, Age;
